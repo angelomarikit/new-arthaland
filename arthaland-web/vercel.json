@@ -1,5 +1,5 @@
 {
-  "rewrites": [{ "source": "/((?!assets/|favicon\\.svg|favicon\\.ico).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "source": "/(.*\\.(webp|png|jpg|jpeg|avif|gif|svg|woff2))",
+      "source": "/(.*).(webp|png|jpg|jpeg|avif|gif|svg|woff2)",
       "headers": [
         {
           "key": "Cache-Control",
