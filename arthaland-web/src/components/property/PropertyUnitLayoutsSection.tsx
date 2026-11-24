@@ -32,7 +32,7 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
   }, [visibleUnits])
 
   const [activeTab, setActiveTab] = useState(tabGroups[0] ?? 'custom')
-  const [zoomUnitId, setZoomUnitId] = useState<string | null>(null)
+  const [zoomSrc, setZoomSrc] = useState<string | null>(null)
 
   const filtered = useMemo(
     () =>
@@ -56,10 +56,6 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
       </section>
     )
   }
-
-  const zoomUnit = zoomUnitId
-    ? units.find((u) => u.id === zoomUnitId)
-    : undefined
 
   return (
     <section className="py-16 md:py-24" id="layouts">
@@ -135,23 +131,24 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                     loading="lazy"
                   />
                 )}
-                {unit.floorPlanImages[0] && (
+                {unit.floorPlanImages.map((src) => (
                   <button
+                    key={src}
                     type="button"
-                    className="relative mt-6 block w-full overflow-hidden border border-border"
-                    onClick={() => setZoomUnitId(unit.id)}
+                    className="mt-6 block w-full border border-border bg-surface text-left"
+                    onClick={() => setZoomSrc(src)}
                   >
                     <img
-                      src={unit.floorPlanImages[0]}
+                      src={src}
                       alt={`Floor plan — ${unit.name}`}
-                      className="aspect-[4/3] w-full object-contain bg-surface transition-transform hover:scale-105"
+                      className="h-auto w-full object-contain"
                       loading="lazy"
                     />
-                    <span className="absolute bottom-2 right-2 bg-ink/80 px-2 py-1 text-xs text-surface">
+                    <span className="block border-t border-border px-3 py-2 text-right text-xs tracking-wide text-title-muted">
                       Zoom
                     </span>
                   </button>
-                )}
+                ))}
                 {unit.brochureUrl && (
                   <a
                     href={unit.brochureUrl}
@@ -168,17 +165,17 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
         </FadeInWhenVisible>
       </Container>
 
-      {zoomUnit?.floorPlanImages[0] && (
+      {zoomSrc && (
         <button
           type="button"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/90 p-6"
-          onClick={() => setZoomUnitId(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/90 p-4 md:p-8"
+          onClick={() => setZoomSrc(null)}
           aria-label="Close floor plan"
         >
           <img
-            src={zoomUnit.floorPlanImages[0]}
+            src={zoomSrc}
             alt=""
-            className="max-h-[90vh] max-w-full object-contain"
+            className="h-auto max-h-[92vh] w-auto max-w-full object-contain"
           />
         </button>
       )}
