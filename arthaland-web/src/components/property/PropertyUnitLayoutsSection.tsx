@@ -10,6 +10,12 @@ type PropertyUnitLayoutsSectionProps = {
   units: UnitType[]
 }
 
+/** Fits the full image inside a modest preview frame (no crop). Zoom opens full size. */
+const layoutPreviewImgClass =
+  'mx-auto block h-auto w-auto max-h-[min(28rem,42svh)] max-w-full object-contain sm:max-h-[min(32rem,48svh)]'
+const layoutPreviewFrameClass =
+  'flex w-full items-center justify-center bg-surface px-3 py-4 sm:px-4'
+
 export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSectionProps) {
   const visibleUnits = useMemo(
     () =>
@@ -134,12 +140,14 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                         key={`render-${src}`}
                         className="overflow-visible border border-border bg-surface"
                       >
-                        <img
-                          src={src}
-                          alt={`Unit render — ${unit.name}`}
-                          className="mx-auto block h-auto max-h-none w-full max-w-none object-contain"
-                          loading="lazy"
-                        />
+                        <div className={layoutPreviewFrameClass}>
+                          <img
+                            src={src}
+                            alt={`Unit render — ${unit.name}`}
+                            className={layoutPreviewImgClass}
+                            loading="lazy"
+                          />
+                        </div>
                       </figure>
                     ))}
                     {unit.floorPlanImages.map((src) => (
@@ -152,12 +160,14 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                           className="block w-full overflow-visible text-left"
                           onClick={() => setZoomSrc(src)}
                         >
-                          <img
-                            src={src}
-                            alt={`Floor plan — ${unit.name}`}
-                            className="mx-auto block h-auto max-h-none w-full max-w-none object-contain"
-                            loading="lazy"
-                          />
+                          <div className={layoutPreviewFrameClass}>
+                            <img
+                              src={src}
+                              alt={`Floor plan — ${unit.name}`}
+                              className={layoutPreviewImgClass}
+                              loading="lazy"
+                            />
+                          </div>
                           <span className="block border-t border-border px-3 py-2 text-right text-xs tracking-wide text-title-muted">
                             Zoom for full size
                           </span>
