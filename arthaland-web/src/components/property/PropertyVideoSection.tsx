@@ -23,7 +23,7 @@ export function PropertyVideoSection({ development, video }: PropertyVideoSectio
           Project showcase — overview of the address and lifestyle (not a unit-specific
           walk-through unless noted).
         </p>
-        <div className="relative mt-8 flex w-full justify-center bg-ink px-3 py-4 md:px-6 md:py-6">
+        <div className="mt-8 flex justify-center">
           {isExternal ? (
             <a
               href={url}
@@ -39,8 +39,9 @@ export function PropertyVideoSection({ development, video }: PropertyVideoSectio
               poster={poster}
               controls
               playsInline
-              className="mx-auto block h-auto max-h-[min(80svh,720px)] w-auto max-w-full object-contain object-center"
               preload="metadata"
+              className="block w-auto max-w-full object-contain object-center"
+              style={{ height: 'min(75svh, 720px)' }}
             />
           )}
         </div>
