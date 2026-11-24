@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ZoomIn } from 'lucide-react'
 import type { UnitType } from '../../domain/development/types'
 import { UNIT_TAB_LABEL, UNIT_TAB_ORDER } from '../../domain/propertyDetail/types'
@@ -73,6 +74,26 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
 
   const [activeTab, setActiveTab] = useState(tabGroups[0] ?? 'custom')
   const [zoomSrc, setZoomSrc] = useState<string | null>(null)
+
+  const openZoom = useCallback((src: string) => {
+    setZoomSrc(src)
+  }, [])
+
+  const closeZoom = useCallback(() => setZoomSrc(null), [])
+
+  useEffect(() => {
+    if (!zoomSrc) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeZoom()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [zoomSrc, closeZoom])
 
   const filtered = useMemo(
     () =>
@@ -174,7 +195,7 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                         key={`render-${src}`}
                         src={src}
                         alt={`Unit render — ${unit.name}`}
-                        onZoom={() => setZoomSrc(src)}
+                        onZoom={() => openZoom(src)}
                       />
                     ))}
                     {unit.floorPlanImages.map((src) => (
@@ -182,7 +203,7 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                         key={src}
                         src={src}
                         alt={`Floor plan — ${unit.name}`}
-                        onZoom={() => setZoomSrc(src)}
+                        onZoom={() => openZoom(src)}
                       />
                     ))}
                   </div>
@@ -203,30 +224,32 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
         </FadeInWhenVisible>
       </Container>
 
-      {zoomSrc && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col bg-ink/92"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Floor plan zoom"
-        >
-          <button
-            type="button"
-            className="flex min-h-0 flex-1 cursor-zoom-out items-center justify-center p-4 pb-2 md:p-8"
-            onClick={() => setZoomSrc(null)}
-            aria-label="Close zoom view"
+      {zoomSrc &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[200] flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-ink/92"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Floor plan zoom"
           >
-            <img
-              src={zoomSrc}
-              alt=""
-              className="h-auto max-h-[78vh] w-auto max-w-full object-contain md:max-h-[82vh]"
-            />
-          </button>
-          <div className="shrink-0 border-t border-surface/15 bg-ink px-4 py-3 text-center sm:py-4">
-            <p className="text-sm text-surface/90 sm:text-base">Tap anywhere to close</p>
-          </div>
-        </div>
-      )}
+            <button
+              type="button"
+              className="flex min-h-0 flex-1 cursor-zoom-out items-center justify-center overflow-hidden p-4 md:p-8"
+              onClick={closeZoom}
+              aria-label="Close zoom view"
+            >
+              <img
+                src={zoomSrc}
+                alt=""
+                className="h-auto max-h-full w-auto max-w-full object-contain"
+              />
+            </button>
+            <div className="shrink-0 border-t border-surface/15 bg-ink px-4 py-3 text-center sm:py-4">
+              <p className="text-sm text-surface/90 sm:text-base">Tap anywhere to close</p>
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   )
 }
