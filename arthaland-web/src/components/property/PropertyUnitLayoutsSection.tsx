@@ -59,8 +59,8 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
 
   return (
     <section className="py-16 md:py-24" id="layouts">
-      <Container className="section-x">
-        <FadeInWhenVisible>
+      <Container className="section-x max-w-[min(100%,1440px)]">
+        <FadeInWhenVisible className="overflow-visible">
           <Eyebrow>Residences</Eyebrow>
           <h2 className="text-heading-3 mt-4">Unit layouts & floor plans</h2>
           {tabGroups.length > 1 && (
@@ -81,9 +81,12 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
               ))}
             </div>
           )}
-          <div className="mt-10 grid gap-10 lg:grid-cols-2">
+          <div className="mt-10 flex flex-col gap-12">
             {filtered.map((unit) => (
-              <article key={unit.id} className="border border-border bg-surface-soft p-6">
+              <article
+                key={unit.id}
+                className="overflow-visible border border-border bg-surface-soft p-6 md:p-8"
+              >
                 <h3 className="text-lg font-medium">{unit.name}</h3>
                 {unit.description ? (
                   <ReadableBodyText className="mt-2 text-sm">{unit.description}</ReadableBodyText>
@@ -123,32 +126,46 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                     ))}
                   </ul>
                 )}
-                {unit.unitRenderImages && unit.unitRenderImages[0] && (
-                  <img
-                    src={unit.unitRenderImages[0]}
-                    alt=""
-                    className="mt-6 aspect-[4/3] w-full object-cover"
-                    loading="lazy"
-                  />
-                )}
-                {unit.floorPlanImages.map((src) => (
-                  <button
-                    key={src}
-                    type="button"
-                    className="mt-6 block w-full border border-border bg-surface text-left"
-                    onClick={() => setZoomSrc(src)}
-                  >
-                    <img
-                      src={src}
-                      alt={`Floor plan — ${unit.name}`}
-                      className="h-auto w-full object-contain"
-                      loading="lazy"
-                    />
-                    <span className="block border-t border-border px-3 py-2 text-right text-xs tracking-wide text-title-muted">
-                      Zoom
-                    </span>
-                  </button>
-                ))}
+                {(unit.unitRenderImages?.length ?? 0) > 0 ||
+                (unit.floorPlanImages?.length ?? 0) > 0 ? (
+                  <div className="mt-8 space-y-8 overflow-visible">
+                    {unit.unitRenderImages?.map((src) => (
+                      <figure
+                        key={`render-${src}`}
+                        className="overflow-visible border border-border bg-surface"
+                      >
+                        <img
+                          src={src}
+                          alt={`Unit render — ${unit.name}`}
+                          className="mx-auto block h-auto max-h-none w-full max-w-none object-contain"
+                          loading="lazy"
+                        />
+                      </figure>
+                    ))}
+                    {unit.floorPlanImages.map((src) => (
+                      <figure
+                        key={src}
+                        className="overflow-visible border border-border bg-surface"
+                      >
+                        <button
+                          type="button"
+                          className="block w-full overflow-visible text-left"
+                          onClick={() => setZoomSrc(src)}
+                        >
+                          <img
+                            src={src}
+                            alt={`Floor plan — ${unit.name}`}
+                            className="mx-auto block h-auto max-h-none w-full max-w-none object-contain"
+                            loading="lazy"
+                          />
+                          <span className="block border-t border-border px-3 py-2 text-right text-xs tracking-wide text-title-muted">
+                            Zoom for full size
+                          </span>
+                        </button>
+                      </figure>
+                    ))}
+                  </div>
+                ) : null}
                 {unit.brochureUrl && (
                   <a
                     href={unit.brochureUrl}
