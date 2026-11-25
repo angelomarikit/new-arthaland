@@ -1,54 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { ZoomIn } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import type { UnitType } from '../../domain/development/types'
 import { UNIT_TAB_LABEL, UNIT_TAB_ORDER } from '../../domain/propertyDetail/types'
 import { Container } from '../ui/Container'
 import { ReadableBodyText } from '../ui/ReadableBodyText'
 import { Eyebrow } from '../ui/Eyebrow'
 import { FadeInWhenVisible } from '../page/FadeInWhenVisible'
+import { PropertyImageCarousel } from './PropertyImageCarousel'
 
 type PropertyUnitLayoutsSectionProps = {
   units: UnitType[]
-}
-
-/** Full plan visible inside preview; wide enough that room labels stay legible. */
-const layoutPreviewImgClass =
-  'mx-auto block h-auto w-full max-h-[min(38rem,58svh)] max-w-[min(100%,56rem)] object-contain md:max-h-[min(42rem,62svh)]'
-const layoutPreviewFrameClass =
-  'flex w-full items-center justify-center bg-surface px-4 py-5 sm:px-6'
-
-type LayoutImagePreviewCardProps = {
-  src: string
-  alt: string
-  onZoom: () => void
-}
-
-function LayoutImagePreviewCard({ src, alt, onZoom }: LayoutImagePreviewCardProps) {
-  return (
-    <figure className="overflow-hidden border border-border bg-surface">
-      <button
-        type="button"
-        className="block w-full cursor-zoom-in text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-        onClick={onZoom}
-        aria-label={`Zoom — ${alt}`}
-      >
-        <div className={layoutPreviewFrameClass}>
-          <img src={src} alt={alt} className={layoutPreviewImgClass} loading="lazy" />
-        </div>
-      </button>
-      <div className="border-t border-border bg-surface-soft">
-        <button
-          type="button"
-          onClick={onZoom}
-          className="flex w-full items-center justify-center gap-2.5 px-4 py-3.5 text-sm font-medium text-ink transition-colors hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ink sm:py-4 sm:text-base"
-        >
-          <ZoomIn className="size-5 shrink-0" aria-hidden />
-          Zoom to view details
-        </button>
-      </div>
-    </figure>
-  )
 }
 
 export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSectionProps) {
@@ -73,27 +33,6 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
   }, [visibleUnits])
 
   const [activeTab, setActiveTab] = useState(tabGroups[0] ?? 'custom')
-  const [zoomSrc, setZoomSrc] = useState<string | null>(null)
-
-  const openZoom = useCallback((src: string) => {
-    setZoomSrc(src)
-  }, [])
-
-  const closeZoom = useCallback(() => setZoomSrc(null), [])
-
-  useEffect(() => {
-    if (!zoomSrc) return
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeZoom()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [zoomSrc, closeZoom])
 
   const filtered = useMemo(
     () =>
@@ -143,113 +82,101 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
             </div>
           )}
           <div className="mt-10 flex flex-col gap-12">
-            {filtered.map((unit) => (
-              <article
-                key={unit.id}
-                className="overflow-visible border border-border bg-surface-soft p-6 md:p-8"
-              >
-                <h3 className="text-lg font-medium">{unit.name}</h3>
-                {unit.description ? (
-                  <ReadableBodyText className="mt-2 text-sm">{unit.description}</ReadableBodyText>
-                ) : null}
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  {unit.bedrooms && (
-                    <>
-                      <dt className="text-title-muted">Bedrooms</dt>
-                      <dd>{unit.bedrooms}</dd>
-                    </>
+            {filtered.map((unit) => {
+              const renders = unit.unitRenderImages ?? []
+              const plans = unit.floorPlanImages ?? []
+              const hasRenders = renders.length > 0
+              const hasPlans = plans.length > 0
+
+              return (
+                <article
+                  key={unit.id}
+                  className="overflow-visible border border-border bg-surface-soft p-6 md:p-8"
+                >
+                  <h3 className="text-lg font-medium">{unit.name}</h3>
+                  {unit.description ? (
+                    <ReadableBodyText className="mt-2 text-sm">{unit.description}</ReadableBodyText>
+                  ) : null}
+                  <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    {unit.bedrooms && (
+                      <>
+                        <dt className="text-title-muted">Bedrooms</dt>
+                        <dd>{unit.bedrooms}</dd>
+                      </>
+                    )}
+                    {unit.bathrooms && (
+                      <>
+                        <dt className="text-title-muted">Bathrooms</dt>
+                        <dd>{unit.bathrooms}</dd>
+                      </>
+                    )}
+                    {(unit.areaMin || unit.areaMax) && (
+                      <>
+                        <dt className="text-title-muted">Area (sqm)</dt>
+                        <dd>
+                          {[unit.areaMin, unit.areaMax].filter(Boolean).join(' – ')}
+                        </dd>
+                      </>
+                    )}
+                    {unit.priceNote && (
+                      <>
+                        <dt className="text-title-muted">Pricing note</dt>
+                        <dd>{unit.priceNote}</dd>
+                      </>
+                    )}
+                  </dl>
+                  {unit.features && unit.features.length > 0 && (
+                    <ul className="mt-4 list-disc pl-5 text-sm text-title-muted">
+                      {unit.features.map((f) => (
+                        <li key={f}>{f}</li>
+                      ))}
+                    </ul>
                   )}
-                  {unit.bathrooms && (
-                    <>
-                      <dt className="text-title-muted">Bathrooms</dt>
-                      <dd>{unit.bathrooms}</dd>
-                    </>
-                  )}
-                  {(unit.areaMin || unit.areaMax) && (
-                    <>
-                      <dt className="text-title-muted">Area (sqm)</dt>
-                      <dd>
-                        {[unit.areaMin, unit.areaMax].filter(Boolean).join(' – ')}
-                      </dd>
-                    </>
-                  )}
-                  {unit.priceNote && (
-                    <>
-                      <dt className="text-title-muted">Pricing note</dt>
-                      <dd>{unit.priceNote}</dd>
-                    </>
-                  )}
-                </dl>
-                {unit.features && unit.features.length > 0 && (
-                  <ul className="mt-4 list-disc pl-5 text-sm text-title-muted">
-                    {unit.features.map((f) => (
-                      <li key={f}>{f}</li>
-                    ))}
-                  </ul>
-                )}
-                {(unit.unitRenderImages?.length ?? 0) > 0 ||
-                (unit.floorPlanImages?.length ?? 0) > 0 ? (
-                  <div className="mt-8 space-y-8 overflow-visible">
-                    {unit.unitRenderImages?.map((src) => (
-                      <LayoutImagePreviewCard
-                        key={`render-${src}`}
-                        src={src}
-                        alt={`Unit render — ${unit.name}`}
-                        onZoom={() => openZoom(src)}
+
+                  {hasRenders ? (
+                    <div className="mt-8">
+                      <p className="mb-3 text-xs uppercase tracking-[0.12em] text-title-muted">
+                        Unit renderings
+                      </p>
+                      <PropertyImageCarousel
+                        images={renders}
+                        label={`${unit.name} unit renderings`}
+                        getImageAlt={() => `Unit render — ${unit.name}`}
+                        variant="layout"
                       />
-                    ))}
-                    {unit.floorPlanImages.map((src) => (
-                      <LayoutImagePreviewCard
-                        key={src}
-                        src={src}
-                        alt={`Floor plan — ${unit.name}`}
-                        onZoom={() => openZoom(src)}
+                    </div>
+                  ) : null}
+
+                  {hasPlans ? (
+                    <div className="mt-8">
+                      <p className="mb-3 text-xs uppercase tracking-[0.12em] text-title-muted">
+                        Floor plans
+                      </p>
+                      <PropertyImageCarousel
+                        images={plans}
+                        label={`${unit.name} floor plans`}
+                        getImageAlt={() => `Floor plan — ${unit.name}`}
+                        variant="layout"
                       />
-                    ))}
-                  </div>
-                ) : null}
-                {unit.brochureUrl && (
-                  <a
-                    href={unit.brochureUrl}
-                    className="mt-4 inline-block text-sm underline"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Download brochure
-                  </a>
-                )}
-              </article>
-            ))}
+                    </div>
+                  ) : null}
+
+                  {unit.brochureUrl ? (
+                    <a
+                      href={unit.brochureUrl}
+                      className="mt-6 inline-block text-sm underline"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Download brochure
+                    </a>
+                  ) : null}
+                </article>
+              )
+            })}
           </div>
         </FadeInWhenVisible>
       </Container>
-
-      {zoomSrc &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[200] flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-ink/92"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Floor plan zoom"
-          >
-            <button
-              type="button"
-              className="flex min-h-0 flex-1 cursor-zoom-out items-center justify-center overflow-hidden p-4 md:p-8"
-              onClick={closeZoom}
-              aria-label="Close zoom view"
-            >
-              <img
-                src={zoomSrc}
-                alt=""
-                className="h-auto max-h-full w-auto max-w-full object-contain"
-              />
-            </button>
-            <div className="shrink-0 border-t border-surface/15 bg-ink px-4 py-3 text-center sm:py-4">
-              <p className="text-sm text-surface/90 sm:text-base">Tap anywhere to close</p>
-            </div>
-          </div>,
-          document.body,
-        )}
     </section>
   )
 }
