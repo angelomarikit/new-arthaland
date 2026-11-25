@@ -134,8 +134,8 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                   )}
 
                   {hasRenders ? (
-                    <div className="mt-8">
-                      <p className="mb-3 text-xs uppercase tracking-[0.12em] text-title-muted">
+                    <div className="mt-6">
+                      <p className="mb-2 text-xs uppercase tracking-[0.12em] text-title-muted">
                         Unit renderings
                       </p>
                       <PropertyImageCarousel
@@ -149,8 +149,8 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                   ) : null}
 
                   {hasPlans ? (
-                    <div className="mt-8">
-                      <p className="mb-3 text-xs uppercase tracking-[0.12em] text-title-muted">
+                    <div className="mt-6">
+                      <p className="mb-2 text-xs uppercase tracking-[0.12em] text-title-muted">
                         Floor plans
                       </p>
                       <PropertyImageCarousel

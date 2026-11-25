@@ -15,8 +15,9 @@ export type PropertyImageCarouselProps = {
   variant?: 'gallery' | 'layout'
 }
 
+/** Compact in-section preview; full detail stays in the zoom lightbox. */
 const layoutPreviewImgClass =
-  'mx-auto block h-auto w-full max-w-full object-contain'
+  'mx-auto block h-auto w-auto max-w-full max-h-[min(36vh,220px)] object-contain sm:max-h-[min(40vh,280px)] md:max-h-[min(38vh,340px)] md:max-w-[min(100%,32rem)] lg:max-h-[min(42vh,380px)] lg:max-w-[min(100%,36rem)]'
 
 export function PropertyImageCarousel({
   images,
@@ -77,8 +78,10 @@ export function PropertyImageCarousel({
     : 'max-h-[min(70vh,520px)] w-full max-w-full object-contain transition-opacity group-hover:opacity-95'
 
   const stageClass = isLayout
-    ? 'relative bg-surface px-2 py-4 sm:px-4 sm:py-5'
+    ? 'relative bg-surface px-1 py-2 sm:px-2 sm:py-3'
     : 'relative bg-surface-muted/40 px-2 py-4 sm:px-4 md:min-h-[480px] md:py-6'
+
+  const carouselGridMax = isLayout ? 'max-w-[min(100%,40rem)]' : 'max-w-[56rem]'
 
   return (
     <>
@@ -105,7 +108,7 @@ export function PropertyImageCarousel({
           }}
         >
           <div
-            className={`mx-auto grid w-full max-w-[56rem] items-center gap-2 ${
+            className={`mx-auto grid w-full ${carouselGridMax} items-center gap-1.5 sm:gap-2 ${
               multiple
                 ? 'grid-cols-[minmax(2.75rem,auto)_minmax(0,1fr)_minmax(2.75rem,auto)]'
                 : 'grid-cols-1'
