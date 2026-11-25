@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 
-function uniqueImages(urls: string[]) {
-  return [...new Set(urls.filter(Boolean))]
+function prepareSlides(urls: string[], dedupe: boolean) {
+  const list = urls.filter(Boolean)
+  return dedupe ? [...new Set(list)] : list
 }
 
 export type PropertyImageCarouselProps = {
@@ -23,7 +24,12 @@ export function PropertyImageCarousel({
   getImageAlt,
   variant = 'gallery',
 }: PropertyImageCarouselProps) {
-  const slides = useMemo(() => uniqueImages(images), [images])
+  const isLayout = variant === 'layout'
+  const slidesKey = images.join('\0')
+  const slides = useMemo(
+    () => prepareSlides(images, !isLayout),
+    [images, isLayout, slidesKey],
+  )
   const [slideIndex, setSlideIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const touchStartX = useRef<number | null>(null)
@@ -41,7 +47,7 @@ export function PropertyImageCarousel({
 
   useEffect(() => {
     setSlideIndex((i) => (i < slides.length ? i : 0))
-  }, [slides.length])
+  }, [slidesKey, slides.length])
 
   useEffect(() => {
     if (!lightboxOpen) return
@@ -61,8 +67,9 @@ export function PropertyImageCarousel({
 
   if (slides.length === 0) return null
 
-  const currentSrc = slides[slideIndex]!
-  const isLayout = variant === 'layout'
+  const safeIndex =
+    slides.length > 0 ? Math.min(slideIndex, slides.length - 1) : 0
+  const currentSrc = slides[safeIndex]!
   const multiple = slides.length > 1
 
   const previewImgClass = isLayout
@@ -84,7 +91,7 @@ export function PropertyImageCarousel({
         <div
           className={stageClass}
           onTouchStart={(e) => {
-            touchStartX.current = e.changedTouches[0]?.clientX ?? null
+            touchStartX.current = e.touches[0]?.clientX ?? null
           }}
           onTouchEnd={(e) => {
             const start = touchStartX.current
@@ -118,10 +125,11 @@ export function PropertyImageCarousel({
             <div className="flex min-w-0 justify-center">
               {isLayout ? (
                 <img
+                  key={`${safeIndex}-${currentSrc}`}
                   src={currentSrc}
-                  alt={getImageAlt(slideIndex)}
+                  alt={getImageAlt(safeIndex)}
                   className={previewImgClass}
-                  loading={slideIndex === 0 ? 'eager' : 'lazy'}
+                  loading={safeIndex === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                 />
               ) : (
@@ -129,13 +137,14 @@ export function PropertyImageCarousel({
                   type="button"
                   className="group relative flex w-full cursor-zoom-in justify-center"
                   onClick={openLightbox}
-                  aria-label={`Zoom — ${getImageAlt(slideIndex)}`}
+                  aria-label={`Zoom — ${getImageAlt(safeIndex)}`}
                 >
                   <img
+                    key={`${safeIndex}-${currentSrc}`}
                     src={currentSrc}
-                    alt={getImageAlt(slideIndex)}
+                    alt={getImageAlt(safeIndex)}
                     className={previewImgClass}
-                    loading={slideIndex === 0 ? 'eager' : 'lazy'}
+                    loading={safeIndex === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                   />
                   <span className="pointer-events-none absolute bottom-3 right-3 bg-ink/70 px-2 py-1 text-[10px] uppercase tracking-wider text-surface md:bottom-4 md:right-4">
@@ -179,10 +188,10 @@ export function PropertyImageCarousel({
                 type="button"
                 onClick={() => setSlideIndex(index)}
                 className={`size-2.5 rounded-full transition-colors ${
-                  index === slideIndex ? 'bg-ink' : 'bg-border hover:bg-ink/40'
+                  index === safeIndex ? 'bg-ink' : 'bg-border hover:bg-ink/40'
                 }`}
                 aria-label={`Go to image ${index + 1}`}
-                aria-current={index === slideIndex}
+                aria-current={index === safeIndex}
               />
             ))}
           </div>
@@ -191,7 +200,7 @@ export function PropertyImageCarousel({
         {multiple ? (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-title-muted md:px-5">
             <span>
-              Image {slideIndex + 1} of {slides.length}
+              Image {safeIndex + 1} of {slides.length}
             </span>
             <span className="hidden sm:inline">
               {isLayout
@@ -204,7 +213,7 @@ export function PropertyImageCarousel({
         {multiple && !isLayout ? (
           <GalleryThumbRow
             slides={slides}
-            activeIndex={slideIndex}
+            activeIndex={safeIndex}
             onSelect={setSlideIndex}
           />
         ) : null}
@@ -251,15 +260,16 @@ export function PropertyImageCarousel({
               aria-label="Close zoom view"
             >
               <img
+                key={`${safeIndex}-${currentSrc}`}
                 src={currentSrc}
-                alt={getImageAlt(slideIndex)}
+                alt={getImageAlt(safeIndex)}
                 className="h-auto max-h-full w-auto max-w-full object-contain"
               />
             </button>
             <div className="shrink-0 border-t border-surface/15 bg-ink px-4 py-3 text-center sm:py-4">
               {multiple ? (
                 <p className="text-sm text-surface/90 sm:text-base">
-                  Image {slideIndex + 1} of {slides.length} · Tap to close
+                  Image {safeIndex + 1} of {slides.length} · Tap to close
                 </p>
               ) : (
                 <p className="text-sm text-surface/90 sm:text-base">Tap anywhere to close</p>

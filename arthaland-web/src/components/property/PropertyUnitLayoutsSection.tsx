@@ -139,9 +139,10 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                         Unit renderings
                       </p>
                       <PropertyImageCarousel
+                        key={`${unit.id}-renders`}
                         images={renders}
                         label={`${unit.name} unit renderings`}
-                        getImageAlt={() => `Unit render — ${unit.name}`}
+                        getImageAlt={(index) => `Unit render — ${unit.name} (${index + 1})`}
                         variant="layout"
                       />
                     </div>
@@ -153,9 +154,10 @@ export function PropertyUnitLayoutsSection({ units }: PropertyUnitLayoutsSection
                         Floor plans
                       </p>
                       <PropertyImageCarousel
+                        key={`${unit.id}-plans`}
                         images={plans}
                         label={`${unit.name} floor plans`}
-                        getImageAlt={() => `Floor plan — ${unit.name}`}
+                        getImageAlt={(index) => `Floor plan — ${unit.name} (${index + 1})`}
                         variant="layout"
                       />
                     </div>
