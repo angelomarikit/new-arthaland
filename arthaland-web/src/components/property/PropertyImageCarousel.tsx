@@ -15,7 +15,7 @@ export type PropertyImageCarouselProps = {
 }
 
 const layoutPreviewImgClass =
-  'mx-auto block h-auto w-full max-h-[min(38rem,58svh)] max-w-[min(100%,56rem)] object-contain md:max-h-[min(42rem,62svh)]'
+  'mx-auto block h-auto w-full max-w-full object-contain'
 
 export function PropertyImageCarousel({
   images,
@@ -70,8 +70,8 @@ export function PropertyImageCarousel({
     : 'max-h-[min(70vh,520px)] w-full max-w-full object-contain transition-opacity group-hover:opacity-95'
 
   const stageClass = isLayout
-    ? 'relative flex min-h-[min(52vh,360px)] items-center justify-center bg-surface px-4 py-5 sm:min-h-[min(56vh,420px)] sm:px-6'
-    : 'relative flex min-h-[min(56vw,420px)] items-center justify-center bg-surface-muted/40 md:min-h-[480px]'
+    ? 'relative bg-surface px-2 py-4 sm:px-4 sm:py-5'
+    : 'relative bg-surface-muted/40 px-2 py-4 sm:px-4 md:min-h-[480px] md:py-6'
 
   return (
     <>
@@ -97,52 +97,65 @@ export function PropertyImageCarousel({
             else goNext()
           }}
         >
-          <button
-            type="button"
-            className="group absolute inset-0 z-0 flex items-center justify-center p-4 md:p-10"
-            onClick={openLightbox}
-            aria-label={`Zoom — ${getImageAlt(slideIndex)}`}
+          <div
+            className={`mx-auto grid w-full max-w-[56rem] items-center gap-2 ${
+              multiple
+                ? 'grid-cols-[minmax(2.75rem,auto)_minmax(0,1fr)_minmax(2.75rem,auto)]'
+                : 'grid-cols-1'
+            }`}
           >
-            <img
-              src={currentSrc}
-              alt={getImageAlt(slideIndex)}
-              className={previewImgClass}
-              loading={slideIndex === 0 ? 'eager' : 'lazy'}
-              decoding="async"
-            />
-            {!isLayout ? (
-              <span className="pointer-events-none absolute bottom-3 right-3 bg-ink/70 px-2 py-1 text-[10px] uppercase tracking-wider text-surface md:bottom-4 md:right-4">
-                Tap to zoom
-              </span>
-            ) : null}
-          </button>
-
-          {multiple ? (
-            <>
+            {multiple ? (
               <button
                 type="button"
-                className="absolute left-2 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border bg-surface/95 text-ink shadow-sm transition-colors hover:bg-surface md:left-4"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  goPrev()
-                }}
+                className="flex size-11 shrink-0 items-center justify-center border border-border bg-surface text-ink shadow-sm transition-colors hover:bg-surface-alt"
+                onClick={goPrev}
                 aria-label="Previous image"
               >
                 <ChevronLeft className="size-6" />
               </button>
+            ) : null}
+
+            <div className="flex min-w-0 justify-center">
+              {isLayout ? (
+                <img
+                  src={currentSrc}
+                  alt={getImageAlt(slideIndex)}
+                  className={previewImgClass}
+                  loading={slideIndex === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="group relative flex w-full cursor-zoom-in justify-center"
+                  onClick={openLightbox}
+                  aria-label={`Zoom — ${getImageAlt(slideIndex)}`}
+                >
+                  <img
+                    src={currentSrc}
+                    alt={getImageAlt(slideIndex)}
+                    className={previewImgClass}
+                    loading={slideIndex === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                  <span className="pointer-events-none absolute bottom-3 right-3 bg-ink/70 px-2 py-1 text-[10px] uppercase tracking-wider text-surface md:bottom-4 md:right-4">
+                    Tap to zoom
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {multiple ? (
               <button
                 type="button"
-                className="absolute right-2 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center border border-border bg-surface/95 text-ink shadow-sm transition-colors hover:bg-surface md:right-4"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  goNext()
-                }}
+                className="flex size-11 shrink-0 items-center justify-center border border-border bg-surface text-ink shadow-sm transition-colors hover:bg-surface-alt"
+                onClick={goNext}
                 aria-label="Next image"
               >
                 <ChevronRight className="size-6" />
               </button>
-            </>
-          ) : null}
+            ) : null}
+          </div>
         </div>
 
         {isLayout && (
