@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { GtmPageView } from './components/analytics/GtmPageView'
 import { MetaPixelPageView } from './components/analytics/MetaPixelPageView'
 import { DocumentHead } from './components/seo/DocumentHead'
 import { AdminGuard } from './components/admin/AdminGuard'
@@ -220,6 +221,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <DocumentHead />
+        <GtmPageView />
         <MetaPixelPageView />
         <Suspense fallback={<PageFallback />}>
           <Routes>
