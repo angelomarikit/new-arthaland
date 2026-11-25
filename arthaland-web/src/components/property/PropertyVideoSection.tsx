@@ -1,5 +1,7 @@
+import { ExternalLink } from 'lucide-react'
 import type { Development } from '../../domain/development/types'
 import type { PropertyVideoInfo } from '../../domain/propertyDetail/types'
+import { parseVideoEmbedUrl } from '../../lib/video/videoEmbed'
 import { Eyebrow } from '../ui/Eyebrow'
 
 type PropertyVideoSectionProps = {
@@ -12,7 +14,11 @@ export function PropertyVideoSection({ development, video }: PropertyVideoSectio
   const poster = video?.poster ?? development.videoPoster
   if (!url) return null
 
+  const embed = parseVideoEmbedUrl(url)
   const isExternal = video?.source === 'external'
+  const isDirectFile =
+    !embed &&
+    /\.(mp4|webm|ogg)(\?|$)/i.test(url.split('#')[0] ?? url)
 
   return (
     <section className="py-16 md:py-24" id="video">
@@ -24,14 +30,28 @@ export function PropertyVideoSection({ development, video }: PropertyVideoSectio
           walk-through unless noted).
         </p>
         <div className="mt-8 flex justify-center">
-          {isExternal ? (
+          {embed ? (
+            <div className="aspect-video w-full max-w-4xl overflow-hidden border border-border bg-ink/5">
+              <iframe
+                src={embed.embedUrl}
+                title={`${development.name} showcase video`}
+                className="size-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          ) : isExternal || !isDirectFile ? (
             <a
               href={url}
               target="_blank"
               rel="noreferrer"
-              className="flex min-h-[200px] w-full items-center justify-center text-surface underline"
+              className="flex min-h-[200px] w-full max-w-4xl flex-col items-center justify-center gap-2 border border-border bg-surface-soft px-6 py-10 text-ink transition-colors hover:bg-surface-alt"
             >
-              Watch showcase video (opens in new tab)
+              <ExternalLink className="size-6 text-title-muted" aria-hidden />
+              <span className="text-base font-medium underline underline-offset-4">
+                Watch showcase video
+              </span>
+              <span className="text-xs text-title-muted">Opens in a new tab</span>
             </a>
           ) : (
             <video
