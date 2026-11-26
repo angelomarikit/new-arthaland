@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { GtmPageView } from './components/analytics/GtmPageView'
 import { MetaPixelPageView } from './components/analytics/MetaPixelPageView'
 import { DocumentHead } from './components/seo/DocumentHead'
+import { PageSeoProvider } from './components/seo/PageSeo'
 import { AdminGuard } from './components/admin/AdminGuard'
 import { AdminLayout } from './components/admin/AdminLayout'
 import { MainLayout } from './components/layout/MainLayout'
@@ -220,6 +221,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <PageSeoProvider>
         <DocumentHead />
         <GtmPageView />
         <MetaPixelPageView />
@@ -326,6 +328,7 @@ export default function App() {
 
           </Routes>
         </Suspense>
+        </PageSeoProvider>
       </BrowserRouter>
     </AuthProvider>
   )

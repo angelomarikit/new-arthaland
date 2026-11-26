@@ -9,6 +9,7 @@ import { FeaturedUnitPhotoGallery } from '../components/featuredUnit/FeaturedUni
 import type { FeaturedUnit } from '../domain/featuredUnit/types'
 import { fetchFeaturedUnitBySlug } from '../lib/cms/featuredUnitsApi'
 import { getFeaturedUnitPhotos } from '../lib/featuredUnitPhotos'
+import { FeaturedUnitPageSeo } from '../components/seo/FeaturedUnitPageSeo'
 
 export function FeaturedUnitDetailPage() {
   const { slug = '' } = useParams()
@@ -51,6 +52,7 @@ export function FeaturedUnitDetailPage() {
 
   return (
     <>
+      <FeaturedUnitPageSeo unit={unit} />
       <SiteHeader />
       <div className="border-b border-border bg-surface pt-[var(--site-header-h)]">
         <Container className="section-x py-4 md:py-6">

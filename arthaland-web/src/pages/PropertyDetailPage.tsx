@@ -13,6 +13,7 @@ import { PropertyNearbySection } from '../components/property/PropertyNearbySect
 import { PropertyOverviewSection } from '../components/property/PropertyOverviewSection'
 import { PropertyUnitLayoutsSection } from '../components/property/PropertyUnitLayoutsSection'
 import { PropertyVideoSection } from '../components/property/PropertyVideoSection'
+import { PropertyPageSeo } from '../components/seo/PropertyPageSeo'
 import { isSoldOutDevelopment } from '../config/developments'
 import { useSupabaseCms } from '../lib/supabase/config'
 import {
@@ -72,6 +73,7 @@ export function PropertyDetailPage() {
 
   return (
     <>
+      <PropertyPageSeo development={development} />
       <SiteHeader embedded />
       {cms && state === 'error' && (
         <div className="border-b border-amber-200 bg-amber-50 py-2 text-center text-xs text-amber-950">
